@@ -1,11 +1,10 @@
 <h1 align="center">We are Here We GO<h1>
-<p align="center">
+<h6 align="center">
   We are a robotics team from Ottobrunn, Germany participating in the First Lego League competition. 
-</p>
-<p align="center">
+</h6>
+<h6 align="center">
   Here you can find our code to use for your own projects.
-</p>
-  <a href="https://www.youtube.com/@HereWeGO-w1j">Unser Youtube Kanal</a>
+</h6>
 
 
 <!--
