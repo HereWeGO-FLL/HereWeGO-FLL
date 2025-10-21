@@ -4,7 +4,7 @@
 </h3>
 <h4 align="center">🎯 Where to find us:
 </h4>
-
+<h5><i class="fa-brands fa-instagram"></i>Instagram</h5>
     
 
 
