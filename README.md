@@ -7,7 +7,7 @@
 <p>
   <a href="https://www.youtube.com/@HereWeGO-w1j" style="text-decoration:none; margin-right:80px;">
     <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="16" alt="YouTube" style="vertical-align:sub;">
-    <span style="font-size:10px; vertical-align:middle; margin-left:6px;">YouTube</span>
+    <span style="font-size:10px; vertical-align:middle; margin-left:6px;">YouTube     </span>
   </a>
 
   <a href="https://www.instagram.com/herewego_robotics/" style="text-decoration:none; margin-left:80px;">
