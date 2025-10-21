@@ -1,4 +1,6 @@
- We are a robotics team from Ottobrunn, Germany participating in the First Lego League competition. The last four years we have always qualified for the international competition levels. Here you can find our code to use for your own projects. 
+#We are Here We GO
+We are a robotics team from Ottobrunn, Germany participating in the First Lego League competition. 
+Here you can find our code to use for your own projects. 
 
 <!--
 **HereWeGO-FLL/HereWeGO-FLL** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
