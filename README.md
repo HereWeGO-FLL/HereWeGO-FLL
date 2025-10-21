@@ -4,7 +4,7 @@
 </h3>
 <h4 align="center">🎯 Where to find us:
 </h4>
-<p align:center>
+<p align:"center">
   <a href="https://www.instagram.com/herewego_robotics/">
     Instagram    
   </a>
