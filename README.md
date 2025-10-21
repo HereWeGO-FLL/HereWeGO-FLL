@@ -4,11 +4,11 @@
 </h3>
 <h4 align="center">🎯 Where to find us:
 </h4>
-<p align="center">
+<p>
   <a href="https://www.instagram.com/herewego_robotics/" style="text-decoration:none; display:inline-flex; align-items:center; background-color:#000000; color:#ffffff; padding:6px 12px; border-radius:6px; margin-right:10px; font-weight:bold; font-family:sans-serif;">
     Instagram
   </a>
-  <h5>       </h5>
+  <h5> </h5>
   <a href="https://www.youtube.com/@HereWeGO-w1j" style="text-decoration:none; display:inline-flex; align-items:center; background-color:#000000; color:#ffffff; padding:6px 12px; border-radius:6px; margin-left:10px; font-weight:bold; font-family:sans-serif;">
     YouTube
   </a>
