@@ -4,17 +4,25 @@
 </h3>
 <h4 align="center">🎯 Where to find us:
 </h4>
-<p>
-  <a href="https://www.youtube.com/@HereWeGO-w1j" style="text-decoration:none; margin-right:400px">
-    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="16" alt="YouTube" style="vertical-align:sub;">
-    <span style="font-size:10px; vertical-align:middle; margin-left:6px;">YouTube</span>
+<p align="center">
+  <a href="https://www.instagram.com/herewego_robotics/" style="text-decoration:none; display:inline-flex; align-items:center; background-color:#000000; color:#ffffff; padding:6px 12px; border-radius:6px; margin-right:10px; font-weight:bold; font-family:sans-serif;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/64px-Instagram_logo_2022.svg.png" width="20" alt="Instagram" style="margin-right:6px;">
+    Instagram
   </a>
 
-  <a href="https://www.instagram.com/herewego_robotics/" style="text-decoration:none; margin-left:400px">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/64px-Instagram_logo_2022.svg.png" width="16" alt="Instagram" style="vertical-align:sub;">
-    <span style="font-size:10px; vertical-align:middle; margin-left:6px;">Instagram</span>
+  <a href="https://www.youtube.com/@HereWeGO-w1j" style="text-decoration:none; display:inline-flex; align-items:center; background-color:#000000; color:#ffffff; padding:6px 12px; border-radius:6px; margin-left:10px; font-weight:bold; font-family:sans-serif;">
+    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="20" alt="YouTube" style="margin-right:6px;">
+    YouTube
   </a>
 </p>
+
+
+
+
+
+
+
+
 
 
 
