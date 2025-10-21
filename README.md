@@ -1,7 +1,7 @@
 <h1 align="center">We are Here We GO<h1>
-<h6 align="center">
+<h3 align="center">
   We are a robotics team from Ottobrunn, Germany participating in the First Lego League competition. Here you can find our code to use for your own projects.
-</h6>
+</h3>
 <h4 align="center">🎯 Where to find us:
 </h4>
 
