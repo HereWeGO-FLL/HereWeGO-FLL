@@ -6,7 +6,7 @@
 </h4>
 <p align="center">
   <a href="https://www.youtube.com/@HereWeGO-w1j" style="text-decoration:none; margin-right:20px;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/YouTube_icon_%282017%29.svg/64px-YouTube_icon_%282017%29.svg.png" width="32" alt="YouTube" style="vertical-align:middle;">
+    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="32" alt="YouTube" style="vertical-align:middle;">
     <span style="font-size:16px; vertical-align:middle; margin-left:8px;">YouTube</span>
   </a>
 
