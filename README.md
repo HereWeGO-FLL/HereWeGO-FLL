@@ -4,7 +4,7 @@
 </h3>
 <h4 align="center">🎯 Where to find us:
 </h4>
-<p align="center">
+<p>
   <a href="https://www.youtube.com/@HereWeGO-w1j" style="text-decoration:none; margin-right:80px;">
     <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="24" alt="YouTube" style="vertical-align:sub;">
     <span style="font-size:16px; vertical-align:middle; margin-left:6px;">YouTube</span>
