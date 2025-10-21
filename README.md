@@ -6,15 +6,15 @@
 </h4>
 <p align="center">
   <a href="https://www.youtube.com/@HereWeGO-w1j" style="text-decoration:none; margin-right:20px;">
-    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="32" alt="YouTube" style="vertical-align:middle;">
-    <span style="font-size:16px; vertical-align:middle; margin-left:8px;">YouTube</span>
+    <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" width="24" alt="YouTube" style="vertical-align:text-bottom;">
+    <span style="font-size:16px; vertical-align:middle; margin-left:6px;">YouTube</span>
   </a>
 
   <a href="https://www.instagram.com/herewego_robotics/" style="text-decoration:none; margin-left:20px;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/64px-Instagram_logo_2022.svg.png" width="32" alt="Instagram" style="vertical-align:middle;">
-    <span style="font-size:16px; vertical-align:middle; margin-left:8px;">Instagram</span>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/64px-Instagram_logo_2022.svg.png" width="24" alt="Instagram" style="vertical-align:text-bottom;">
+    <span style="font-size:16px; vertical-align:middle; margin-left:6px;">Instagram</span>
   </a>
 </p>
-    
+
 
 
