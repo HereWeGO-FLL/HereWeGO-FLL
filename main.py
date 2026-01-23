@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from pybricks.hubs import PrimeHub
 from pybricks.pupdevices import Motor
 from pybricks.parameters import Axis, Port, Color, Direction, Button, Side, Icon, Stop
@@ -355,3 +356,6 @@ class UI:
 
 ui = UI()
 ui.start()
+=======
+
+>>>>>>> a7ade41fde41fec63ef644ae7f2217d1fc519fe0
