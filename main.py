@@ -101,9 +101,6 @@ def roundTwo(): #15.01.26 check
     smallMotorRight.run_angle(1000,-400)
     turnBothWheels(-30)
     straight(-650)
-
-
-
     db.stop()
 
 
