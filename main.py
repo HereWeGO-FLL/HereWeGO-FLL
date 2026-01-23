@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from pybricks.hubs import PrimeHub
 from pybricks.pupdevices import Motor
 from pybricks.parameters import Axis, Port, Color, Direction, Button, Side, Icon, Stop
@@ -12,6 +11,7 @@ motorRight = Motor(Port.E, Direction.CLOCKWISE)
 smallMotorRight = Motor(Port.B)
 smallMotorLeft = Motor(Port.F)
 
+#Robot Settings
 WHEEL_DIAMETER = 62.5
 AXLE_TRACK = 145
 
@@ -356,6 +356,3 @@ class UI:
 
 ui = UI()
 ui.start()
-=======
-
->>>>>>> a7ade41fde41fec63ef644ae7f2217d1fc519fe0
