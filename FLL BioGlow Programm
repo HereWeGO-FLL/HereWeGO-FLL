@@ -1,0 +1,327 @@
+from pybricks.hubs import PrimeHub
+from pybricks.pupdevices import Motor, ColorSensor
+from pybricks.parameters import Axis, Port, Color, Direction, Button, Side, Icon, Stop, 
+from pybricks.robotics import DriveBase
+from pybricks.tools import wait
+ 
+#Anpassungen an den Roboter 
+
+motorLeft = Motor(Port.B, Direction.COUNTERCLOCKWISE)
+motorRight = Motor(Port.F, Direction.CLOCKWISE)
+
+smallMotorRight = Motor(Port.E)
+smallMotorLeft = Motor(Port.A)
+
+WHEEL_DIAMETER = 62.5
+AXLE_TRACK = 124 # nach onewheel anpassen(nicht nach drehung sondern nach stillstand des reifens ABER UNTEN ÄNDERN NICHT HIER)
+
+
+#Instalieren des Spike Hubs
+
+hub = PrimeHub(top_side=Axis.Z,front_side=Axis.Y)
+hub.light.on(Color.BLUE)
+hub.imu.reset_heading(0)
+hub.display.orientation(Side.RIGHT)
+hub.system.set_stop_button(Button.BLUETOOTH)
+
+#Instalieren der DriveBase
+
+db = DriveBase(motorLeft, motorRight, wheel_diameter=WHEEL_DIAMETER, axle_track=AXLE_TRACK) 
+db.use_gyro(True)
+db.settings(1090,900,600,700)
+
+# Programmabbruch
+
+def show_error():
+    db.stop()
+    hub.light.on(Color.RED)
+    hub.display.text("!") 
+    hub.light.on(Color.BLUE)
+    
+#Fahrdefinitionen    
+    
+def straight(distance, speed=1090, acc=900, wait=False,):
+    db.reset()
+    db.settings(straight_speed=speed)
+    db.straight(distance, wait=wait)
+    hub.light.on(Color.BLUE)
+    while not db.done():
+        if motorLeft.stalled() or motorRight.stalled():
+            show_error()
+            hub.display.icon(Icon.ARROW_UP)
+            
+
+def turnBothWheels(angle, trys=0, speed=800, acc=700, wait=True):
+    db.reset()
+    db.settings(turn_rate=speed, turn_acceleration=acc)
+    offset = -2 if angle > 0 else 2
+    db.turn(angle + offset, wait=wait)
+    for i in range(trys):
+        error = angle - hub.imu.heading()
+        if abs(error) < 0.02:   
+            break
+        db.turn(error, wait=True)
+    hub.light.on(Color.BLUE)
+
+    
+def turnOneWheel(angle,radius=124,speed=800,acc=700, wait=True):
+    db.reset()
+    db.settings(turn_rate=speed)
+    db.curve(radius,angle, wait=wait)
+    hub.light.on(Color.BLUE)
+
+
+#Runden Definitionen
+
+def roundOne(): 
+    print("Round 1 executed")
+    straight(700)
+    turnBothWheels(180)
+    db.stop()
+
+def roundTwo(): 
+    print("Round 2 executed")
+    
+
+    db.stop()
+    
+def roundThree(): 
+    print("Round 3 executed")
+
+    db.stop()
+
+def roundFour(): 
+    print("Round 4 executed")
+    smallMotorLeft.run_angle(1000,170)
+    straight(20)
+    turnBothWheels(90)
+    straight(592,400,400)
+    #wait(200)
+    #straight(320,200,400)
+    turnBothWheels(-15)
+    wait(100)
+    straight(45)
+    smallMotorRight.run_angle(700,150,wait=False)
+    turnOneWheel(-48,70,80)
+    wait(200)
+    smallMotorRight.run_angle(700,-150,wait=False)
+    turnOneWheel(-58,-70,80)
+    straight(-140)
+    turnBothWheels(-90)
+    motorLeft.run_angle(1000,-55,wait=False)
+    motorRight.run_angle(1000,-55)
+    wait(500)
+    
+    straight(555)
+    wait(300)
+    smallMotorRight.run_angle(1000,170,wait=False)
+    turnBothWheels(90)
+    #straight(140,1000)
+    
+
+    """
+    turnBothWheels(-95)
+    straight(50)
+    turnBothWheels(95)
+    straight(-120)
+    """
+    db.stop()
+
+def roundFive(): 
+    print("Round 5 executed")
+    wait(100)
+    straight(600)
+    smallMotorRight.run_angle(1000,-390)#Rettungsring greifen
+    straight(-40,200)
+    smallMotorRight.run_angle(1000,-45)
+    straight(-110,200)
+    smallMotorRight.run_angle(1000,130)
+    smallMotorRight.run_angle(1000,-210,wait=False)
+    straight(-20)
+    turnBothWheels(-17,10)
+    straight(370,200)
+    turnBothWheels(106.8,20)
+    straight(180,300)#Baumstütze  
+    straight(-8)
+    smallMotorLeft.run_angle(1000,-200)#Kugel reinwerfen
+    smallMotorLeft.run_angle(1000,100,wait=False)
+    straight(-53,500)
+    wait(300)
+    turnBothWheels(95,5)
+    wait(500)
+    straight(300)#Probe mitnehmen
+    turnBothWheels(-23)
+    straight(350)
+    wait(50)
+    turnBothWheels(-165)
+    db.stop()
+    
+def roundSix():
+    print("Round 6 executed")
+    straight(20)
+    turnBothWheels(-45)
+    straight(600)
+    turnBothWheels(45)
+    straight(250)
+    turnBothWheels(44)
+    straight(210)
+    wait(100)
+    straight(70,100)
+    
+    db.stop()
+
+def roundSeven():
+    print("Round 7 executed")
+    wait(100)
+    straight(30)
+    wait(100)
+    turnBothWheels(-52,50)
+    wait(300)
+    smallMotorLeft.run_angle(1000,55,wait=False)
+    straight(600)
+    wait(100)
+    smallMotorRight.run_angle(1000,-145)
+    wait(100)
+    smallMotorRight.run_angle(200,70,wait=False)
+    straight(100)
+    turnBothWheels(50,20)
+    straight(140)
+    turnBothWheels(45,20)
+    straight(286)
+    wait(500)
+    turnBothWheels(7)
+    smallMotorLeft.run_angle(1000,-55)
+    straight(67,60)#Ameisen reinfahren
+    turnBothWheels(8)
+    straight(10)
+    turnBothWheels(7)
+    smallMotorLeft.run_angle(1090,200)#Teamstation rüberklappen
+    
+    straight(-100)
+    turnBothWheels(-92)
+    straight(-540)
+    turnBothWheels(43)
+    straight(-360)
+    db.stop()
+
+#Farbmatrix der Runden
+NUMBER_MATRICES = {
+    1: [
+        [0, 100, 0, 0, 0],
+        [100, 100, 0, 0, 0],
+        [0, 100, 0, 0, 0],
+        [0, 100, 0, 0, 0],
+        [100, 100, 100, 0, 0],
+    ],
+    2: [
+        [100, 100, 100, 0, 0],
+        [0, 0, 100, 0, 0],
+        [100, 100, 100, 0, 0],
+        [100, 0, 0, 0, 0],
+        [100, 100, 100, 0, 0],
+    ],
+    3: [
+        [100, 100, 100, 0, 0],
+        [0, 0, 100, 0, 0],
+        [100, 100, 100, 0, 0],
+        [0, 0, 100, 0, 0],
+        [100, 100, 100, 0, 0],
+    ],
+    4: [
+        [100, 0, 100, 0, 0],
+        [100, 0, 100, 0, 0],
+        [100, 100, 100, 0, 0],
+        [0, 0, 100, 0, 0],
+        [0, 0, 100, 0, 0],
+    ],
+    5: [
+        [100, 100, 100, 0, 0],
+        [100, 0, 0, 0, 0],
+        [100, 100, 100, 0, 0],
+        [0, 0, 100, 0, 0],
+        [100, 100, 100, 0, 0],
+    ],
+    6: [
+        [100, 100, 100, 0, 0],
+        [100, 0, 0, 0, 0],
+        [100, 100, 100, 0, 0],
+        [100, 0, 100, 0, 0],
+        [100, 100, 100, 0, 0],
+    ],
+    7: [
+        [100, 100, 100, 0, 0],
+        [0, 0, 100, 0, 0],
+        [0, 100, 0, 0, 0],
+        [0, 100, 0, 0, 0],
+        [0, 100, 0, 0, 0],
+    ],
+    8: [
+        [100, 100, 100, 0, 0],
+        [100, 0, 100, 0, 0],
+        [100, 100, 100, 0, 0],
+        [100, 0, 100, 0, 0],
+        [100, 100, 100, 0, 0],
+    ],
+}
+
+#Eigene Runden UI
+
+class UI:
+    def __init__(self):
+        self.currentRound = 1 
+        self.ROUND_CYCLE = {
+            1: roundOne,
+            2: roundTwo,
+            3: roundThree,
+            4: roundFour,
+            5: roundFive,
+            6: roundSix,
+            7: roundSeven,
+        }
+    def start(self):
+        """ Starts the user interface."""
+        self.status()
+        self.updateNumber(NUMBER_MATRICES[self.currentRound])
+        while True:
+            self.updateBattery()
+            pressedButtons = hub.buttons.pressed()
+            if Button.CENTER in pressedButtons:
+                self.execute()
+            if Button.RIGHT in pressedButtons:
+                self.cycle(Direction.CLOCKWISE)
+            if Button.LEFT in pressedButtons:
+                self.cycle(Direction.COUNTERCLOCKWISE)
+            wait(50)  # Reduce CPU usage
+    def cycle(self, direction):
+        """Cycles up or down."""
+        if direction == Direction.CLOCKWISE:
+            self.currentRound = self.currentRound % len(self.ROUND_CYCLE) + 1
+        else:
+            self.currentRound = len(self.ROUND_CYCLE) if self.currentRound == 1 else self.currentRound - 1
+        self.updateNumber(NUMBER_MATRICES[self.currentRound])
+        hub.speaker.beep(100, 50)
+        wait(100)
+    def execute(self):
+        """Executes the current round."""
+        hub.display.icon(Icon.ARROW_UP)  
+        self.ROUND_CYCLE[self.currentRound]()  
+        wait(200)
+        self.cycle(Direction.CLOCKWISE) # Go to the next round
+    def status(self):
+        """ Print general information about the robot."""
+        print("Battery: ", hub.battery.voltage(), " mV")
+        print("Calibrated: ", hub.imu.ready())
+    def updateBattery(self):
+        """ Displays the battery level on the hub."""
+        voltage = hub.battery.voltage()
+        MAX_VOLTAGE = 8400
+        for i in range(5): 
+            if voltage >= MAX_VOLTAGE - (i + 1) * 100: # Each level equals 100 mV
+                hub.display.pixel(i, 4, 100)
+    def updateNumber(self, matrix):
+        """ Updates only the left four columns"""
+        for i in range(0, 5):
+            for j in range(0, 4):
+                hub.display.pixel(i, j, matrix[i][j])
+ui = UI()
+ui.start()
