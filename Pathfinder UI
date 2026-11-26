@@ -1,0 +1,611 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Gerade und Kurve</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: eine schmale Spalte. Knöpfe, Feld, aufklappbare Einstellungen, Programm. Nur weiß, schwarz und ein Blau. */
+:root {
+  --bg: #FFFFFF;
+  --ink: #111111;
+  --muted: #555555;
+  --line: #CFCFCF;
+  --accent: #1F5FD6;
+  --on-accent: #FFFFFF;
+  --code-bg: #F3F3F3;
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.page { max-width: 760px; margin-inline: auto; display: grid; gap: 14px; }
+h2 { margin: 0; font-size: 18px; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+
+.btn {
+  font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--ink); border-radius: 4px; padding: 7px 12px; cursor: pointer;
+}
+.btn:hover:not(:disabled) { background: var(--code-bg); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover:not(:disabled) { background: #194DB0; }
+.btn.small { font-size: 14px; padding: 5px 10px; }
+.btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.field { border: 1px solid var(--ink); background: #FFFFFF; touch-action: none; }
+.field canvas { display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; }
+
+details.set { border: 1px solid var(--line); border-radius: 4px; }
+details.set > summary { cursor: pointer; padding: 10px 12px; font-weight: 600; }
+details.set > summary .vals { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 14px; }
+.sgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; padding: 4px 12px 14px; }
+.grp { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.grp h3 { margin: 0; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.fld { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; }
+.fld input, .fld select {
+  font: inherit; font-size: 15px; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--ink); border-radius: 4px; padding: 5px 8px; min-width: 0;
+}
+.fld input[type="number"] { width: 5.5em; }
+.fld .u { color: var(--muted); font-size: 14px; margin-left: 4px; }
+
+textarea.code {
+  display: block; width: 100%; background: var(--code-bg); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 4px; padding: 14px;
+  font-family: var(--mono); font-size: 13px; line-height: 1.55; white-space: pre; overflow: auto;
+  resize: vertical; tab-size: 4; min-height: 8em;
+}
+.field canvas:focus { outline: none; }
+</style>
+
+<div class="page">
+  <div class="row">
+    <button type="button" class="btn" id="btn-rev" aria-pressed="false">Rückwärts: aus</button>
+    <button type="button" class="btn" id="btn-undo">Letzten Punkt löschen</button>
+    <button type="button" class="btn" id="btn-clear">Alles löschen</button>
+  </div>
+
+  <div class="field" id="field"><canvas id="cv" tabindex="0" role="img" aria-label="Spielfeld mit dem festen Startpunkt. Ziehe von dort eine Gerade auf, um den Weg zu zeichnen."></canvas></div>
+
+  <details class="set" id="setBox">
+    <summary>Einstellungen<span class="vals" id="vals"></span></summary>
+    <div class="sgrid">
+      <div class="grp">
+        <h3>Start</h3>
+        <label class="fld" for="startX">x von links <span><input id="startX" type="number" min="0" step="1" value="30"><span class="u">cm</span></span></label>
+        <label class="fld" for="startY">y von unten <span><input id="startY" type="number" min="0" step="1" value="10"><span class="u">cm</span></span></label>
+        <label class="fld" for="startA">Blickrichtung <span><input id="startA" type="number" min="-180" max="180" step="1" value="0"><span class="u">°</span></span></label>
+        <p class="muted" style="font-size:13px">0° = nach oben, positiv = rechts. Du kannst den Pfeil am Start auch im Feld drehen.</p>
+      </div>
+      <div class="grp">
+        <h3>Drehung</h3>
+        <label class="fld" for="stepSel">Schrittweite
+          <select id="stepSel">
+            <option value="45">45°</option>
+            <option value="15" selected>15°</option>
+            <option value="5">5°</option>
+            <option value="1">1°</option>
+          </select>
+        </label>
+      </div>
+      <div class="grp">
+        <h3>Feld</h3>
+        <label class="fld" for="fieldW">Breite <span><input id="fieldW" type="number" min="20" max="400" step="0.1" value="200"><span class="u">cm</span></span></label>
+        <label class="fld" for="fieldH">Höhe <span><input id="fieldH" type="number" min="20" max="400" step="0.1" value="100"><span class="u">cm</span></span></label>
+        <button type="button" class="btn small" id="btn-fll">Größe der FLL-Matte (236,2 × 114,3)</button>
+      </div>
+      <div class="grp">
+        <h3>Spielmatte</h3>
+        <button type="button" class="btn small" id="btn-mat">Bild der Matte wählen</button>
+        <button type="button" class="btn small" id="btn-mat-off" hidden>Matte entfernen</button>
+        <p class="muted" style="font-size:13px" id="matInfo">Das Bild liegt im Hintergrund und wird in diesem Browser gemerkt.</p>
+        <input type="file" id="matFile" accept="image/*" hidden>
+      </div>
+    </div>
+  </details>
+
+  <div class="row">
+    <h2 style="margin-right:auto">Programm</h2>
+    <button type="button" class="btn primary" id="btn-copy">Kopieren</button>
+  </div>
+  <textarea id="code" class="code" rows="8" spellcheck="false" wrap="off" aria-label="Programm zum Einsetzen. Du kannst hier tippen."></textarea>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var FW = 2000, FH = 1000;               /* Feld in mm */
+  var pts = [];                           /* pts[0] = Start */
+  var hover = null, mode = null, matImg = null, moving = -1, reverseMode = false, undoStack = [], redoStack = [], before = null;
+  var cv = $('cv'), ctx = cv.getContext('2d'), box = $('field');
+  var STORE = 'pfad-gerade-kurve-v5', MATKEY = 'pfad-gerade-kurve-matte';
+  var D2R = Math.PI / 180;
+
+  function fmt(n, d) { return n.toLocaleString('de-DE', { maximumFractionDigits: d }); }
+  function norm(t) { while (t > 180) t -= 360; while (t <= -180) t += 360; return t; }
+  function bearing(a, b) { return Math.atan2(b.x - a.x, -(b.y - a.y)) * 180 / Math.PI; }
+  function num(id, def, lo, hi) {
+    var el = $(id), v = Number(el.value);
+    if (el.value === '' || !isFinite(v)) v = def;
+    return Math.min(hi, Math.max(lo, v));
+  }
+
+  /* ---------- Einstellungen ---------- */
+  function readField() { FW = num('fieldW', 200, 20, 400) * 10; FH = num('fieldH', 100, 20, 400) * 10; }
+  function stepDeg() { return Number($('stepSel').value) || 15; }
+  function startAng() { return norm(num('startA', 0, -360, 360)); }
+  function startMm() {
+    return { x: num('startX', 30, 0, FW / 10) * 10, y: FH - num('startY', 10, 0, FH / 10) * 10 };
+  }
+  function scale() { return (cv.clientWidth || 600) / FW; }
+
+  /* ---------- Weg in Befehle ---------- */
+  /* Blickrichtung des Roboters auf der Strecke zu Punkt i (rueckwaerts: Heck zeigt zum Ziel) */
+  function face(i) {
+    var b = bearing(pts[i - 1], pts[i]);
+    return pts[i].rev ? norm(b + 180) : b;
+  }
+  function commands() {
+    var cmds = [], head = startAng();
+    for (var i = 0; i < pts.length - 1; i++) {
+      var d = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+      if (d < 1) continue;
+      var b = face(i + 1), t = norm(b - head);
+      if (Math.abs(t) > 0.05) cmds.push({ t: 'turn', deg: Math.round(t * 10) / 10 });
+      cmds.push({ t: 'drive', mm: Math.round(d) * (pts[i + 1].rev ? -1 : 1) });
+      head = b;
+    }
+    return cmds;
+  }
+  var custom = [], PLACEHOLDER = '    # Noch kein Weg gesetzt', GEN = /^\s*(straight|turnBothWheels)\(/;
+  /* Eigene Zeilen merken: alles, was nicht straight(...) oder turnBothWheels(...) ist, samt Stelle im Weg */
+  function readCustom() {
+    var lines = $('code').value.split('\n'), last = -1, n = 0, out = [];
+    lines.forEach(function (l, i) { if (/^\s*straight\(/.test(l)) last = i; });
+    lines.forEach(function (l, i) {
+      var trailingTurn = i > last && /^\s*turnBothWheels\(/.test(l);
+      if (GEN.test(l) && !trailingTurn) { n++; return; }
+      if (l.trim() === PLACEHOLDER.trim()) return;
+      out.push({ anchor: i > last ? Infinity : n, text: l });
+    });
+    custom = out;
+    updateButtons();
+  }
+  /* Weg aus dem Text neu aufbauen: straight(mm) faehrt, turnBothWheels(grad) dreht, negative Strecke = rueckwaerts */
+  var LINE = /^\s*(straight|turnBothWheels)\(\s*(-?\d+(?:[.,]\d+)?)\s*\)/;
+  function routeFromText() {
+    var head = startAng(), out = [startMm()];
+    $('code').value.split('\n').forEach(function (l) {
+      var m = LINE.exec(l);
+      if (!m) return;
+      var v = parseFloat(m[2].replace(',', '.'));
+      if (m[1] === 'turnBothWheels') { head = norm(head + v); return; }
+      if (v === 0) return;
+      var rev = v < 0, ang = (head + (rev ? 180 : 0)) * D2R, d = Math.abs(v), q = out[out.length - 1];
+      out.push({ x: q.x + Math.sin(ang) * d, y: q.y - Math.cos(ang) * d, rev: rev });
+    });
+    pts = out;
+    hover = null; moving = -1;
+  }
+  function updateButtons() {
+    $('btn-clear').disabled = pts.length <= 1 && !custom.length;
+    $('btn-undo').disabled = pts.length <= 1;
+    $('btn-copy').disabled = !$('code').value.trim() || $('code').value.trim() === PLACEHOLDER.trim();
+  }
+  function mergedText(gen) {
+    var out = [];
+    function at(n) { custom.forEach(function (c) { if (c.anchor === n) out.push(c.text); }); }
+    at(0);
+    gen.forEach(function (l, i) { out.push(l); at(i + 1); });
+    custom.forEach(function (c) { if (c.anchor > gen.length) out.push(c.text); });
+    var t = out.join('\n');
+    return t.trim() ? t : PLACEHOLDER;
+  }
+  function pathLines(cmds) {
+    if (!cmds.length) return [];
+    return cmds.map(function (m) {
+      return m.t === 'drive' ? '    straight(' + m.mm + ')' : '    turnBothWheels(' + m.deg + ')';
+    });
+  }
+  function headingUpTo(n) {
+    var h = startAng();
+    for (var i = 0; i < n - 1; i++) if (Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y) >= 1) h = face(i + 1);
+    return h;
+  }
+  function curHeading() { return headingUpTo(pts.length); }
+
+  /* ---------- Einrasten: erst auf bestehende Punkte, sonst auf Winkelstufe und ganze cm ---------- */
+  function snap(raw, idx) {
+    if (idx === undefined) idx = pts.length;
+    var last = pts[idx - 1], head = headingUpTo(idx), k = scale();
+    var rev = idx < pts.length ? !!pts[idx].rev : reverseMode, off = rev ? 180 : 0;
+    var near = 18 / k, best = -1, bd = Infinity;
+    for (var i = 0; i < pts.length; i++) {
+      if (i === idx || i === idx - 1) continue;
+      var dd = Math.hypot(raw.x - pts[i].x, raw.y - pts[i].y);
+      if (dd < near && dd < bd) { bd = dd; best = i; }
+    }
+    if (best >= 0) {
+      var tp = pts[best], dm = Math.hypot(tp.x - last.x, tp.y - last.y);
+      if (dm >= 10) return { p: { x: tp.x, y: tp.y, rev: rev }, turn: Math.round(norm(bearing(last, tp) + off - head) * 10) / 10, mm: Math.round(dm), magnet: true, rev: rev };
+    }
+    var dist = Math.hypot(raw.x - last.x, raw.y - last.y);
+    if (dist < 10) return null;
+    var step = stepDeg();
+    var turn = Math.round(norm(bearing(last, raw) + off - head) / step) * step;
+    if (turn <= -180) turn = 180;
+    var ang = (head + turn + off) * D2R;
+    var mm = Math.max(10, Math.round(dist / 10) * 10), p;
+    for (;;) {
+      p = { x: last.x + Math.sin(ang) * mm, y: last.y - Math.cos(ang) * mm };
+      if (p.x >= -0.5 && p.x <= FW + 0.5 && p.y >= -0.5 && p.y <= FH + 0.5) break;
+      mm -= 10;
+      if (mm < 10) return null;
+    }
+    p.x = Math.min(FW, Math.max(0, p.x)); p.y = Math.min(FH, Math.max(0, p.y)); p.rev = rev;
+    return { p: p, turn: turn, mm: mm, magnet: false, rev: rev };
+  }
+  function turnText(t) {
+    t = Math.round(t * 10) / 10;
+    return t === 0 ? 'geradeaus' : fmt(Math.abs(t), 1) + '° ' + (t > 0 ? 'rechts' : 'links');
+  }
+
+  /* ---------- Zeichnen ---------- */
+  function label(text, x, y, align, size) {
+    ctx.save();
+    ctx.font = '600 ' + (size || 12) + 'px system-ui, sans-serif'; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#FFFFFF'; ctx.strokeText(text, x, y);
+    ctx.fillStyle = '#111111'; ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  /* kleiner Bogen mit Zahl: zeigt die Drehung vor einer Strecke */
+  function dial(cx, cy, head, turn, ghost) {
+    if (Math.abs(turn) < 0.05) return;
+    var r = 15, a0 = (head - 90) * D2R, a1 = (head + turn - 90) * D2R, am = (head + turn / 2 - 90) * D2R;
+    ctx.save();
+    ctx.globalAlpha = ghost ? 0.8 : 1;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(cx, cy, r, a0, a1, turn < 0); ctx.stroke();
+    ctx.strokeStyle = '#111111'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a0) * (r + 6), cy + Math.sin(a0) * (r + 6)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#1F5FD6'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, r, a0, a1, turn < 0); ctx.stroke();
+    ctx.restore();
+    label(fmt(Math.abs(Math.round(turn * 10) / 10), 1) + '°', cx + Math.cos(am) * (r + 14), cy + Math.sin(am) * (r + 14), 'center', 11);
+  }
+
+  function fit() {
+    var w = box.clientWidth;
+    if (!w) return;
+    var dpr = window.devicePixelRatio || 1, h = w * FH / FW;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    cv.style.height = h + 'px';
+  }
+
+  function tipPx() {
+    var k = scale(), s = pts[0], a = startAng() * D2R;
+    return { x: s.x * k + Math.sin(a) * 16, y: s.y * k - Math.cos(a) * 16 };
+  }
+
+  function draw() {
+    var w = cv.clientWidth;
+    if (!w || !pts.length) return;
+    var k = w / FW, h = FH * k, sc = cv.width / w;
+    ctx.setTransform(sc, 0, 0, sc, 0, 0);
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h);
+    if (matImg) ctx.drawImage(matImg, 0, 0, w, h);
+
+    /* Weg */
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    function seg(i, color, lw) {
+      ctx.save();
+      ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.setLineDash(pts[i].rev ? [7, 5] : []);
+      if (pts[i].rev) ctx.lineCap = 'butt';
+      ctx.beginPath(); ctx.moveTo(pts[i - 1].x * k, pts[i - 1].y * k); ctx.lineTo(pts[i].x * k, pts[i].y * k); ctx.stroke();
+      ctx.restore();
+    }
+    for (var si = 1; si < pts.length; si++) seg(si, '#FFFFFF', 6);
+    for (var sj = 1; sj < pts.length; sj++) seg(sj, '#1F5FD6', 2.5);
+
+    var l = pts[pts.length - 1];
+    if (hover) {
+      ctx.save();
+      ctx.setLineDash([6, 5]); ctx.lineCap = 'butt';
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(l.x * k, l.y * k); ctx.lineTo(hover.p.x * k, hover.p.y * k); ctx.stroke();
+      ctx.strokeStyle = '#1F5FD6'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(l.x * k, l.y * k); ctx.lineTo(hover.p.x * k, hover.p.y * k); ctx.stroke();
+      ctx.restore();
+      if (hover.magnet) {
+        ctx.strokeStyle = '#1F5FD6'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(hover.p.x * k, hover.p.y * k, 9, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+
+    /* Drehungen und Laengen der fertigen Geraden */
+    var head = startAng();
+    for (var i = 0; i < pts.length - 1; i++) {
+      var dx = pts[i + 1].x - pts[i].x, dy = pts[i + 1].y - pts[i].y, len = Math.hypot(dx, dy);
+      if (len < 1) continue;
+      var bb = face(i + 1);
+      dial(pts[i].x * k, pts[i].y * k, head, norm(bb - head), false);
+      var nx = dy / len, ny = -dx / len;
+      label(fmt(len / 10, 0) + (pts[i + 1].rev ? ' cm rückw.' : ' cm'), (pts[i].x + dx / 2) * k + nx * 12, (pts[i].y + dy / 2) * k + ny * 12);
+      head = bb;
+    }
+    if (hover) {
+      dial(l.x * k, l.y * k, curHeading(), hover.turn, true);
+      var hx = hover.p.x * k, hy = hover.p.y * k, right = hx > w * 0.6;
+      label(fmt(hover.mm / 10, 0) + ' cm · ' + turnText(hover.turn) + (hover.rev ? ' · rückwärts' : ''), hx + (right ? -12 : 12), hy - 14, right ? 'right' : 'left', 13);
+    }
+
+    /* Punkte */
+    pts.forEach(function (p, i) {
+      if (i === 0) return;
+      ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(p.x * k, p.y * k, 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#1F5FD6'; ctx.beginPath(); ctx.arc(p.x * k, p.y * k, 3, 0, Math.PI * 2); ctx.fill();
+    });
+
+    if (moving > 0 && pts[moving]) {
+      ctx.strokeStyle = '#1F5FD6'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(pts[moving].x * k, pts[moving].y * k, 9, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    /* Start mit Pfeil und Drehgriff */
+    var s = pts[0], sx = s.x * k, sy = s.y * k, tp = tipPx(), sa = startAng() * D2R;
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(tp.x, tp.y); ctx.stroke();
+    ctx.strokeStyle = '#111111'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(tp.x, tp.y); ctx.stroke();
+    ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(sx, sy, 6.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#111111'; ctx.beginPath(); ctx.arc(sx, sy, 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#111111'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(tp.x, tp.y, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+
+  function valsText() {
+    return 'Start ' + fmt(num('startX', 30, 0, 9999), 1) + ' / ' + fmt(num('startY', 10, 0, 9999), 1) + ' cm, Blick ' + fmt(startAng(), 0) + '°, ' + stepDeg() + '°-Schritte';
+  }
+
+  function changed() {
+    var cmds = commands();
+    var text = mergedText(pathLines(cmds)), ta = $('code');
+    if (ta.value !== text) ta.value = text;
+    ta.rows = Math.min(18, Math.max(8, text.split('\n').length + 1));
+    $('btn-undo').disabled = pts.length <= 1;
+    updateButtons();
+    $('vals').textContent = valsText();
+    draw();
+  }
+
+  function snapshot(withCustom) {
+    var o = { p: pts.map(function (p) { return { x: p.x, y: p.y, rev: !!p.rev }; }) };
+    if (withCustom) o.c = custom.map(function (c) { return { anchor: c.anchor, text: c.text }; });
+    return o;
+  }
+  function remember(prev) {
+    undoStack.push(prev);
+    if (undoStack.length > 100) undoStack.shift();
+    redoStack = [];
+  }
+  function undo() {
+    if (mode || !undoStack.length) return;
+    var st = undoStack.pop();
+    redoStack.push(snapshot(!!st.c)); pts = st.p; if (st.c) custom = st.c;
+    changed();
+  }
+  function redo() {
+    if (mode || !redoStack.length) return;
+    var st = redoStack.pop();
+    undoStack.push(snapshot(!!st.c)); pts = st.p; if (st.c) custom = st.c;
+    changed();
+  }
+  /* keepHistory: "Alles löschen" bleibt rückgängig machbar, Änderungen am Start oder Feld nicht */
+  function resetRoute(keepHistory) {
+    if (keepHistory) { if (pts.length > 1 || custom.length) remember(snapshot(true)); custom = []; }
+    else { undoStack = []; redoStack = []; }
+    pts = [startMm()];
+    changed();
+  }
+
+  /* ---------- Eingabe ---------- */
+  function pos(e) {
+    var r = cv.getBoundingClientRect();
+    return {
+      x: Math.min(FW, Math.max(0, (e.clientX - r.left) / r.width * FW)),
+      y: Math.min(FH, Math.max(0, (e.clientY - r.top) / r.height * FH))
+    };
+  }
+  function onTip(e) {
+    var r = cv.getBoundingClientRect(), t = tipPx();
+    return Math.hypot(e.clientX - r.left - t.x, e.clientY - r.top - t.y) <= 10;
+  }
+  function rotateTo(e) {
+    var p = pos(e), s = pts[0];
+    if (Math.hypot(p.x - s.x, p.y - s.y) < 20) return;
+    var step = stepDeg(), a = Math.round(bearing(s, p) / step) * step;
+    $('startA').value = String(norm(a));
+    save(); changed();
+  }
+  function preview(e) {
+    hover = snap(pos(e));
+    draw();
+  }
+  function pointAt(e) {
+    var r = cv.getBoundingClientRect(), k = scale();
+    for (var i = pts.length - 1; i >= 1; i--) {
+      if (Math.hypot(e.clientX - r.left - pts[i].x * k, e.clientY - r.top - pts[i].y * k) <= 14) return i;
+    }
+    return -1;
+  }
+  function movePoint(e) {
+    var sn = snap(pos(e), moving);
+    if (sn) { pts[moving] = sn.p; changed(); }
+  }
+  cv.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    try { cv.setPointerCapture(e.pointerId); } catch (err) { }
+    try { cv.focus({ preventScroll: true }); } catch (err) { }
+    if (onTip(e)) { mode = 'rot'; rotateTo(e); return; }
+    var i = pointAt(e);
+    if (i > 0) { mode = 'move'; moving = i; hover = null; before = snapshot(); changed(); return; }
+    mode = 'draw';
+    preview(e);
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (mode === 'rot') { rotateTo(e); return; }
+    if (mode === 'move') { movePoint(e); return; }
+    if (mode === 'draw') { preview(e); return; }
+    if (e.pointerType === 'touch') return;
+    var tip = onTip(e), over = !tip && pointAt(e) > 0;
+    cv.style.cursor = tip ? 'grab' : over ? 'move' : 'crosshair';
+    if (tip || over) { hover = null; draw(); return; }
+    preview(e);
+  });
+  cv.addEventListener('pointerup', function () {
+    var m = mode, h = hover, prev = snapshot();
+    mode = null; hover = null; moving = -1;
+    if (m === 'draw' && h) { pts.push(h.p); remember(prev); }
+    else if (m === 'move' && before && JSON.stringify(before) !== JSON.stringify(prev)) remember(before);
+    before = null;
+    changed();
+  });
+  cv.addEventListener('dblclick', function (e) {
+    var i = pointAt(e);
+    if (i > 0) { remember(snapshot()); pts[i].rev = !pts[i].rev; changed(); }
+  });
+  cv.addEventListener('pointercancel', function () { mode = null; hover = null; moving = -1; changed(); });
+  cv.addEventListener('pointerleave', function () { if (!mode) { hover = null; changed(); } });
+
+  $('btn-rev').addEventListener('click', function () {
+    reverseMode = !reverseMode;
+    this.setAttribute('aria-pressed', String(reverseMode));
+    this.textContent = 'Rückwärts: ' + (reverseMode ? 'an' : 'aus');
+  });
+  var textBefore = null;
+  $('code').addEventListener('focus', function () { textBefore = snapshot(true); });
+  $('code').addEventListener('blur', function () {
+    if (textBefore && JSON.stringify(textBefore) !== JSON.stringify(snapshot(true))) remember(textBefore);
+    textBefore = null;
+  });
+  $('code').addEventListener('input', function () { readCustom(); routeFromText(); updateButtons(); draw(); });
+  document.addEventListener('keydown', function (e) {
+    var t = e.target && e.target.tagName;
+    if (t === 'INPUT' || t === 'SELECT' || t === 'TEXTAREA') return;
+    if (!(e.ctrlKey || e.metaKey)) return;
+    var key = (e.key || '').toLowerCase();
+    if (key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if (key === 'y' || (key === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+  });
+  $('btn-undo').addEventListener('click', function () { if (pts.length > 1) { remember(snapshot()); pts.pop(); } changed(); });
+  $('btn-clear').addEventListener('click', function () { resetRoute(true); });
+  $('stepSel').addEventListener('change', function () { save(); changed(); });
+  $('startA').addEventListener('change', function () { save(); changed(); });
+  ['startX', 'startY'].forEach(function (id) {
+    $(id).addEventListener('change', function () { save(); resetRoute(); });
+  });
+  ['fieldW', 'fieldH'].forEach(function (id) {
+    $(id).addEventListener('change', function () { readField(); save(); fit(); resetRoute(); });
+  });
+  $('btn-fll').addEventListener('click', function () {
+    $('fieldW').value = '236.2'; $('fieldH').value = '114.3';
+    readField(); save(); fit(); resetRoute();
+  });
+
+  /* ---------- Kopieren ---------- */
+  $('btn-copy').addEventListener('click', function () {
+    var btn = this;
+    var done = function (msg) { btn.textContent = msg; setTimeout(function () { btn.textContent = 'Kopieren'; }, 2200); };
+    var fallback = function () {
+      $('code').focus(); $('code').select();
+      done('Markiert: jetzt Strg + C');
+    };
+    try { navigator.clipboard.writeText($('code').value).then(function () { done('Kopiert'); }, fallback); }
+    catch (err) { fallback(); }
+  });
+
+  /* ---------- Spielmatte im Hintergrund ---------- */
+  function setMat(url) {
+    var im = new Image();
+    im.onload = function () { matImg = im; $('btn-mat-off').hidden = false; $('matInfo').textContent = 'Die Matte liegt im Hintergrund. Stelle unter "Feld" die echte Größe ein.'; draw(); };
+    im.src = url;
+  }
+  $('btn-mat').addEventListener('click', function () { $('matFile').click(); });
+  $('matFile').addEventListener('change', function () {
+    var f = this.files && this.files[0], input = this;
+    if (!f) return;
+    var fr = new FileReader();
+    fr.onload = function () {
+      var im = new Image();
+      im.onload = function () {
+        var mw = Math.min(1800, im.naturalWidth), mh = Math.round(mw * im.naturalHeight / im.naturalWidth);
+        var c = document.createElement('canvas'); c.width = mw; c.height = mh;
+        c.getContext('2d').drawImage(im, 0, 0, mw, mh);
+        var url = c.toDataURL('image/jpeg', 0.85);
+        try { localStorage.setItem(MATKEY, url); } catch (err) { }
+        setMat(url);
+        input.value = '';
+      };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(f);
+  });
+  $('btn-mat-off').addEventListener('click', function () {
+    matImg = null; this.hidden = true;
+    $('matInfo').textContent = 'Das Bild liegt im Hintergrund und wird in diesem Browser gemerkt.';
+    try { localStorage.removeItem(MATKEY); } catch (err) { }
+    draw();
+  });
+
+  /* ---------- Merken (nur in diesem Browser) ---------- */
+  var IDS = ['startX', 'startY', 'startA', 'stepSel', 'fieldW', 'fieldH'];
+  function save() {
+    try {
+      var d = {};
+      IDS.forEach(function (id) { d[id] = $(id).value; });
+      localStorage.setItem(STORE, JSON.stringify(d));
+    } catch (err) { }
+  }
+  function load() {
+    try {
+      var d = JSON.parse(localStorage.getItem(STORE) || 'null');
+      if (!d) return;
+      IDS.forEach(function (id) {
+        if (d[id] === undefined || d[id] === null) return;
+        if (id === 'stepSel') { if (['45', '15', '5', '1'].indexOf(String(d[id])) >= 0) $(id).value = String(d[id]); }
+        else if (d[id] !== '' && isFinite(Number(d[id]))) $(id).value = d[id];
+      });
+    } catch (err) { }
+  }
+
+  /* ---------- Start ---------- */
+  if (window.ResizeObserver) new ResizeObserver(function () { fit(); draw(); }).observe(box);
+  else window.addEventListener('resize', function () { fit(); draw(); });
+  load();
+  readField();
+  pts = [startMm()];
+  fit();
+  changed();
+  try { var saved = localStorage.getItem(MATKEY); if (saved) setMat(saved); } catch (err) { }
+})();
+</script>
+
+</body></html>
